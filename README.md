@@ -11,8 +11,10 @@ DocWeave 是一个面向个人知识管理的智能文档知识库。它让用�
 - Maven Wrapper
 - Spring Data JPA
 - MySQL
+- Flyway
 - Bean Validation
 - Spring Boot Actuator
+- OpenAPI / Swagger UI
 
 前端计划采用 Vue 3、TypeScript 和 Vite，并位于 `frontend/` 目录。前后端独立构建与部署，但由同一个 Git 仓库管理。
 
@@ -26,6 +28,7 @@ DocWeave 是一个面向个人知识管理的智能文档知识库。它让用�
 6. 对话历史、引用预览和在线演示
 
 完整路线见 [项目骨架与模块开发路线](docs/开发规划/01-项目骨架与模块开发路线.md)。
+接口约定见 [接口设计约定](docs/接口说明/01-接口设计约定.md)。
 
 ## 目录说明
 

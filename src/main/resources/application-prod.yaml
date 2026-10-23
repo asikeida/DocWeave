@@ -8,3 +8,9 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
