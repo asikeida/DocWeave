@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: docweave
+  profiles:
+    default: local
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
