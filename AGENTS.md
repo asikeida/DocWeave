@@ -6,7 +6,7 @@
 
 DocWeave 是一个带引用证据的智能文档知识库，也是可公开展示的求职作品。每次改动都应当能说明：解决了什么问题、怎样验证、是否可以安全合并。
 
-后端使用 Java 21、Spring Boot 4.1.1 和 Maven；前端后续位于 `frontend/`，使用 Vue 3、TypeScript 和 Vite。项目采用单仓库、前后端独立构建、后端模块化单体的方式演进。
+后端使用 Java 21、Spring Boot 4.1.1 和 Maven；前端位于 `frontend/`，使用 Vue 3、TypeScript 和 Vite。项目采用单仓库、前后端独立构建、后端模块化单体的方式演进。
 
 ## 2. 开始任务前必读
 
@@ -28,12 +28,12 @@ DocWeave 是一个带引用证据的智能文档知识库，也是可公开展�
 | 接口、异常、日志、安全 | `03-接口日志与安全规范.md` |
 | Java 命名、注释、公开 API | `05-注释与命名规范.md` |
 | 代码审查或准备 Pull Request | `06-代码审查规范.md` |
-| 前端 | 前端建立后新增对应规则；在此之前遵守通用规则 |
+| 前端 | `07-前端开发规范.md` |
 
 ## 3. 目录与包结构
 
 - Spring Boot 后端保留在仓库根目录，避免无意义迁移 Maven 初始化结构。
-- Vue 前端将位于 `frontend/`。
+- Vue 前端位于 `frontend/`。
 - 可长期维护、适合公开审查的项目文档放在 `docs/` 并提交 Git。
 - AI 的行为规则放在 `.agents/rules/` 并提交 Git；根目录 `AGENTS.md` 是跨 Agent 的统一入口。
 - AI 草稿、临时排查记录和个人笔记放在 `.local/`，该目录不提交。
@@ -96,4 +96,13 @@ me.asikeida.docweave/
 ./mvnw package
 ```
 
-新增或修改 API 时，还要验证参数校验、错误响应、权限边界和 OpenAPI 文档。前端建立后，影响页面行为的改动要在真实浏览器中验证。
+新增或修改 API 时，还要验证参数校验、错误响应、权限边界和 OpenAPI 文档。影响前端页面行为的改动要在真实浏览器中验证。
+
+前端在 `frontend/` 中使用 Node 24 和 packageManager 指定的 pnpm，按顺序执行：
+
+```text
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
