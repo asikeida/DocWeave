@@ -16,7 +16,7 @@ DocWeave 是一个面向个人知识管理的智能文档知识库。它让用�
 - Spring Boot Actuator
 - OpenAPI / Swagger UI
 
-前端计划采用 Vue 3、TypeScript 和 Vite，并位于 `frontend/` 目录。前后端独立构建与部署，但由同一个 Git 仓库管理。
+前端采用 Vue 3、TypeScript 和 Vite，位于 `frontend/` 目录，目前提供概览、404 和健康连接验证。前后端独立构建与部署，但由同一个 Git 仓库管理。
 
 ## 计划功能
 
@@ -35,7 +35,7 @@ DocWeave 是一个面向个人知识管理的智能文档知识库。它让用�
 ```text
 DocWeave/
 ├─ src/                 # Spring Boot 后端
-├─ frontend/            # Vue 前端（后续初始化）
+├─ frontend/            # Vue 前端工程
 ├─ docs/                # 可提交的正式项目文档
 ├─ deploy/              # 容器和部署配置（后续建立）
 ├─ .local/              # 本地笔记和临时记录，不提交 Git
@@ -47,6 +47,8 @@ DocWeave/
 ## 本地运行
 
 本地 MySQL、环境变量和测试运行方式见[本地开发环境](docs/部署运维/01-本地开发环境.md)。
+
+前端启动、代理和新增文件说明见 [前端开发与连通验证](docs/部署运维/04-前端开发与连通验证.md)。
 
 ## 文档规则
 
