@@ -8,11 +8,15 @@ services:
       MYSQL_PASSWORD: ${DOCWEAVE_DB_PASSWORD:?Set DOCWEAVE_DB_PASSWORD in .env}
       MYSQL_ROOT_PASSWORD: ${DOCWEAVE_DB_ROOT_PASSWORD:?Set DOCWEAVE_DB_ROOT_PASSWORD in .env}
     ports:
-      - "${DOCWEAVE_DB_PORT:-3306}:3306"
+      - "127.0.0.1:${DOCWEAVE_DB_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_PASSWORD}" mysql --protocol=TCP -h 127.0.0.1
+          -u"$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e "SELECT 1" >/dev/null 2>&1
       interval: 10s
       timeout: 5s
       retries: 10
