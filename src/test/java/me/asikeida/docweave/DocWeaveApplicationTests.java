@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import java.sql.SQLException;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.MDC;
@@ -34,6 +36,9 @@ class DocWeaveApplicationTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired(required = false)
+    private Flyway flyway;
 
     @Test
     void contextLoads() {
@@ -107,6 +112,15 @@ class DocWeaveApplicationTests {
                 .contains("ERROR", requestId, "Unhandled request failure", "java.lang.IllegalStateException",
                         "synthetic failure for logging verification");
         assertThat(MDC.get("requestId")).isNull();
+    }
+
+    @Test
+    void initializesFlywayHistoryOnStartup() throws SQLException {
+        assertThat(flyway).as("Flyway 必须参与 Spring 启动，而不只是存在依赖").isNotNull();
+        try (var connection = flyway.getConfiguration().getDataSource().getConnection();
+                var tables = connection.getMetaData().getTables(null, null, "flyway_schema_history", null)) {
+            assertThat(tables.next()).as("启动时必须实际创建 Flyway 历史表").isTrue();
+        }
     }
 
     @RestController
