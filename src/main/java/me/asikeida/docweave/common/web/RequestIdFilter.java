@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * 为每个 HTTP 请求生成日志关联标识，并在响应头中返回给调用方。
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestIdFilter extends OncePerRequestFilter {
 
     public static final String REQUEST_ID_ATTRIBUTE = RequestIdFilter.class.getName() + ".requestId";

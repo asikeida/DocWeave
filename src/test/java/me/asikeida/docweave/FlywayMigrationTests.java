@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:flyway-verification;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
+        "spring.jpa.hibernate.ddl-auto=none",
         "spring.flyway.locations=classpath:db/verification"
 })
 @ActiveProfiles("test")

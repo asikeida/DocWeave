@@ -55,7 +55,8 @@ class DocWeaveApplicationTests {
     void exposesOpenApiDefinition() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("DocWeave API"));
+                .andExpect(jsonPath("$.info.title").value("DocWeave API"))
+                .andExpect(jsonPath("$.paths['/api/v1/auth/login'].post.parameters[?(@.name == 'X-XSRF-TOKEN')]").isNotEmpty());
     }
 
     @Test
