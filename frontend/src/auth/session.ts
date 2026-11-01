@@ -1,3 +1,4 @@
+import * as knowledge from '../api/knowledge'
 import * as samples from '../api/samples'
 import { computed, shallowRef } from 'vue'
 import { ApiError } from '../api/client'
@@ -93,6 +94,27 @@ export const session = {
     if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
     const startedAt = revision
     const result = await samples.previewSample(accessToken, id, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async knowledgeBases(initialize = false, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await knowledge.knowledgeBases(accessToken, initialize, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async knowledgeDocuments(id: string, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await knowledge.documents(accessToken, id, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async knowledgeDocument(id: string, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await knowledge.document(accessToken, id, signal)
     if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
     return result
   },

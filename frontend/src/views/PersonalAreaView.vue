@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import KnowledgeLibrary from '../components/KnowledgeLibrary.vue'
 import SamplePreview from '../components/SamplePreview.vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { session } from '../auth/session'
@@ -63,7 +64,8 @@ onBeforeUnmount(() => pending?.abort())
     </button>
     <div v-if="area">
       <h2>{{ area.name }}</h2>
-      <p>个人区域已建立。示例资料待接入，目前不能上传文件或问答。</p>
+      <p>个人区域已建立。可查看入库文档与只读模板，目前不能上传文件或问答。</p>
+      <KnowledgeLibrary />
       <SamplePreview />
       <p>准备完成后，可尝试“试用期员工能远程办公吗？”以及“出差三天需要哪些申请和报销材料？”</p>
     </div>

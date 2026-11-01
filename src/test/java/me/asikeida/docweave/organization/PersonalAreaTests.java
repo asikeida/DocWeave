@@ -42,7 +42,7 @@ class PersonalAreaTests {
         var request=request(); var area=registration.register(request);
         var user=users.findByUsername(request.username()).orElseThrow();
         assertThat(user.getPasswordHash()).doesNotContain(request.password()).startsWith("{bcrypt}");
-        assertThat(area.sampleState()).isEqualTo("WAITING_FEATURE");
+        assertThat(area.sampleState()).isEqualTo("PENDING");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM organization_memberships WHERE tenant_id=? AND user_id=? AND role='OWNER'", Integer.class, area.organizationId(),user.getId())).isOne();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM workspace_grants WHERE tenant_id=? AND user_id=? AND role='ADMIN'", Integer.class,area.organizationId(),user.getId())).isOne();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM organization_events WHERE tenant_id=?",Integer.class,area.organizationId())).isOne();
@@ -101,7 +101,7 @@ class PersonalAreaTests {
         var token=json.readTree(csrf.getContentAsString()).get("token").asText();
         var result=mvc.perform(post("/api/v1/auth/register").cookie(csrf.getCookies()).header("X-XSRF-TOKEN",token).contentType("application/json")
             .content(json.writeValueAsString(Map.of("username",request.username(),"password",request.password(),"displayName",request.displayName()))))
-            .andExpect(status().isCreated()).andExpect(jsonPath("$.sampleState").value("WAITING_FEATURE")).andExpect(header().exists("X-Request-Id")).andReturn();
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.sampleState").value("PENDING")).andExpect(header().exists("X-Request-Id")).andReturn();
         assertThat(result.getResponse().getContentAsString()).doesNotContain("accessToken",request.password());
         mvc.perform(get("/api/v1/personal-area")).andExpect(status().isUnauthorized());
     }

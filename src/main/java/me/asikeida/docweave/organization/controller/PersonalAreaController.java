@@ -30,7 +30,7 @@ public class PersonalAreaController {
 
     @PostMapping("/api/v1/auth/register")
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    @Operation(summary = "注册并原子创建个人区域", description = "默认关闭；仅显式启用的local/test可用。成功后需要登录，示例状态为WAITING_FEATURE。")
+    @Operation(summary = "注册并原子创建个人区域", description = "默认关闭；仅显式启用的local/test可用。成功后需要登录，示例待办为PENDING，后台入库后为IMPORTED_NOT_INDEXED。")
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true)
     ResponseEntity<PersonalArea> register(@Valid @RequestBody RegistrationRequest request, HttpServletRequest servlet) {
         registration.checkAdmission(servlet.getRemoteAddr());
