@@ -39,7 +39,7 @@ class MySqlAuthPersistenceTests {
 
     @Test
     void realMigrationEnforcesUniquenessAndDoesNotRepeat() {
-        assertThat(flyway.info().applied()).hasSize(1);
+        assertThat(flyway.info().applied()).hasSize(2);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         String username = "mysql-" + UUID.randomUUID().toString().substring(0, 8);
         String hash = passwords.encode(UUID.randomUUID().toString());

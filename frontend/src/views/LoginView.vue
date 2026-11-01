@@ -21,7 +21,7 @@ async function submit() {
   try {
     await session.signIn(username.value.trim(), password.value, pending.signal)
     password.value = ''
-    await router.replace('/account')
+    await router.replace('/personal')
   } catch (error) {
     password.value = ''
     if (error instanceof ApiError && error.code === 'CANCELLED') return
@@ -92,7 +92,9 @@ onBeforeUnmount(() => {
         </button>
       </form>
       <p class="muted auth-note">
-        当前仅开放已有账号登录。注册与个人空间功能正在开发中。
+        开发环境可前往注册；示例问答尚未接入。<RouterLink to="/register">
+          创建个人账号
+        </RouterLink>
       </p>
     </div>
   </section>

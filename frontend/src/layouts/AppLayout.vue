@@ -28,6 +28,14 @@ import { session } from '../auth/session'
       </div>
       <nav aria-label="主导航">
         <RouterLink
+          v-if="session.user.value"
+          class="nav-link"
+          to="/personal"
+          active-class="is-active"
+        >
+          我的资料
+        </RouterLink>
+        <RouterLink
           class="nav-link"
           to="/"
           exact-active-class="is-active"

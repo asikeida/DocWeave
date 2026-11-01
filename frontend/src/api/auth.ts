@@ -72,3 +72,37 @@ export async function currentUser(accessToken: string, signal?: AbortSignal): Pr
 export async function logout(): Promise<void> {
   await authMutation('/api/v1/auth/logout')
 }
+
+export interface PersonalArea {
+  organizationId: string
+  workspaceId: string
+  name: string
+  sampleState: 'WAITING_FEATURE'
+}
+
+export function parsePersonalArea(value: unknown): PersonalArea {
+  if (!isRecord(value) || typeof value.organizationId !== 'string' || !value.organizationId
+    || typeof value.workspaceId !== 'string' || !value.workspaceId || typeof value.name !== 'string'
+    || value.sampleState !== 'WAITING_FEATURE') {
+    throw new ApiError('个人区域响应格式不正确', { code: 'INVALID_RESPONSE' })
+  }
+  return value as unknown as PersonalArea
+}
+
+export async function register(username: string, password: string, displayName: string, signal?: AbortSignal): Promise<PersonalArea> {
+  return parsePersonalArea(await authMutation('/api/v1/auth/register', { username, password, displayName }, signal))
+}
+
+export async function personalArea(accessToken: string, initialize: boolean, signal?: AbortSignal): Promise<PersonalArea> {
+  const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` }
+  if (initialize) {
+    const csrf = await requestJson('/api/v1/auth/csrf', { credentials: 'same-origin', cache: 'no-store', signal })
+    if (!isRecord(csrf) || csrf.headerName !== 'X-XSRF-TOKEN' || typeof csrf.token !== 'string') {
+      throw new ApiError('安全校验初始化失败，请重试', { code: 'INVALID_RESPONSE' })
+    }
+    headers[csrf.headerName] = csrf.token
+  }
+  return parsePersonalArea(await requestJson(`/api/v1/personal-area${initialize ? '/initialize' : ''}`, {
+    method: initialize ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store', headers, signal,
+  }))
+}

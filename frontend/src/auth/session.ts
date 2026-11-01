@@ -73,6 +73,14 @@ export const session = {
     }
   },
 
+  async personalArea(initialize = false, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { status: 401, code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const area = await api.personalArea(accessToken, initialize, signal)
+    if (startedAt !== revision) throw new ApiError('登录状态已变化', { code: 'CANCELLED' })
+    return area
+  },
+
   async signOut() {
     // 先等待本标签页刷新完成，再发送退出，避免并发轮换令牌污染浏览器 Cookie。
     if (refreshInFlight) await refreshInFlight.catch(() => false)
