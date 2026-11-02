@@ -1,0 +1,4 @@
+#!/bin/sh
+# Git for Windows 也使用 Git 自带的 sh；不依赖 PowerShell。
+cd "$(git rev-parse --show-toplevel)" || exit 1
+node node_modules/@commitlint/cli/cli.js --edit "$1"
