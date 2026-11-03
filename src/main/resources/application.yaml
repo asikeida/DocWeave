@@ -26,3 +26,17 @@ springdoc:
 logging:
   pattern:
     level: '%5p [requestId=%X{requestId:-}]'
+
+docweave:
+  auth:
+    # 访问令牌有效期；代码校验上限为 15 分钟。
+    access-ttl: 5m
+    # 一次登录的绝对期限；刷新不会延长，上限为 30 天。
+    login-ttl: 7d
+    # local/test 覆盖为 false；prod 禁止关闭。
+    cookie-secure: true
+    issuer: docweave
+    audience: docweave-api
+    login-attempts-per-minute: 20
+    # 仅引用环境变量，不在此保存真实密钥；留空沿用开发/测试密钥策略。
+    jwt-secret: ${DOCWEAVE_JWT_SECRET:}

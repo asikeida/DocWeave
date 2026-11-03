@@ -50,7 +50,7 @@ public class TokenConfiguration {
         if (production && !properties.cookieSecure()) {
             throw new IllegalStateException("生产环境不能关闭安全 Cookie");
         }
-        String configured = environment.getProperty("DOCWEAVE_JWT_SECRET");
+        String configured = properties.jwtSecret();
         byte[] key;
         if (configured != null && !configured.isBlank()) {
             try {
