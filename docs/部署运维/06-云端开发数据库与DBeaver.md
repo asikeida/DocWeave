@@ -98,3 +98,11 @@ docker compose logs --tail 100 mysql
 当前保留服务器 MySQL 和本机 SSH 隧道。DBeaver 的填写步骤不代表已操作或验证本机 DBeaver 界面。
 
 参考：[DBeaver SSH 配置](https://dbeaver.com/docs/dbeaver/SSH-Configuration/)、[DaoCloud 镜像缓存说明](https://github.com/DaoCloud/public-image-mirror)。
+
+## 固定开发库配置（Issue #20）
+
+日常开发使用一个固定的 docweave_dev 库，local profile 默认连接本机 127.0.0.1:13306（由 SSH 隧道转发到数据库服务器）。从仓库根目录启动时，Spring 自动将被忽略的根目录 .env 作为 properties 配置读取；文件使用 KEY=value 格式，不使用 export 或 shell 引号。IDE/系统环境变量优先，切换时应清除旧值。
+
+.env 配置 DOCWEAVE_DB_HOST、DOCWEAVE_DB_PORT、DOCWEAVE_DB_NAME、DOCWEAVE_DB_USERNAME、DOCWEAVE_DB_PASSWORD。真实凭据不提交。历史分阶段审核 .env 文件已停止作为日常入口，删除本地文件不会删除远端数据库。
+
+prod profile 不读取开发 .env，库名和账号默认 docweave_prod，主机和密码仍由部署环境必填。容器内连接使用容器网络地址及 3306，不使用本机开发隧道端口。数据库结构仍由 Flyway 迁移，本配置变更本身不导入数据或执行迁移。

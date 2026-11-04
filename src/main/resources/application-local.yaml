@@ -1,6 +1,8 @@
 spring:
+  config:
+    import: optional:file:./.env[.properties]
   datasource:
-    url: jdbc:mysql://${DOCWEAVE_DB_HOST:localhost}:${DOCWEAVE_DB_PORT:3306}/${DOCWEAVE_DB_NAME:docweave}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    url: jdbc:mysql://${DOCWEAVE_DB_HOST:127.0.0.1}:${DOCWEAVE_DB_PORT:13306}/${DOCWEAVE_DB_NAME:docweave_dev}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
     username: ${DOCWEAVE_DB_USERNAME}
     password: ${DOCWEAVE_DB_PASSWORD}
   jpa:
