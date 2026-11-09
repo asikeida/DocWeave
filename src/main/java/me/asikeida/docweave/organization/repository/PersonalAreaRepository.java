@@ -24,7 +24,7 @@ public class PersonalAreaRepository {
 
     public Optional<PersonalArea> findAuthorized(String userId) {
         return jdbc.query("""
-                SELECT o.id, w.id AS workspace_id, w.name, s.state
+                SELECT o.id, w.id AS workspace_id, w.name, s.import_state AS state
                 FROM organizations o
                 JOIN organization_memberships m ON m.tenant_id=o.id AND m.user_id=o.owner_user_id
                 JOIN workspaces w ON w.tenant_id=o.id
@@ -43,7 +43,7 @@ public class PersonalAreaRepository {
         jdbc.update("INSERT INTO organization_memberships VALUES (?,?,'OWNER',TRUE)", tenant, userId);
         jdbc.update("INSERT INTO workspaces VALUES (?,?,'我的资料')", workspace, tenant);
         jdbc.update("INSERT INTO workspace_grants VALUES (?,?,?,'ADMIN')", tenant, workspace, userId);
-        jdbc.update("INSERT INTO personal_sample_initializations VALUES (?,'v1','WAITING_FEATURE',?)", tenant, timestamp);
+        jdbc.update("INSERT INTO personal_sample_initializations (tenant_id,seed_version,state,created_at) VALUES (?,'v1','WAITING_FEATURE',?)", tenant, timestamp);
         jdbc.update("INSERT INTO organization_events VALUES (?,?,?,'PERSONAL_AREA_CREATED',?)", UUID.randomUUID().toString(), tenant, userId, timestamp);
     }
 }

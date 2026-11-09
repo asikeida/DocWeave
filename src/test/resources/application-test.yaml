@@ -11,6 +11,8 @@ spring:
     locations: classpath:db/migration
 
 docweave:
+  samples:
+    worker-enabled: false
   auth:
     cookie-secure: false
     login-attempts-per-minute: 1000

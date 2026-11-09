@@ -77,13 +77,13 @@ export interface PersonalArea {
   organizationId: string
   workspaceId: string
   name: string
-  sampleState: 'WAITING_FEATURE'
+  sampleState: 'WAITING_FEATURE' | 'PENDING' | 'IMPORTED_NOT_INDEXED'
 }
 
 export function parsePersonalArea(value: unknown): PersonalArea {
   if (!isRecord(value) || typeof value.organizationId !== 'string' || !value.organizationId
     || typeof value.workspaceId !== 'string' || !value.workspaceId || typeof value.name !== 'string'
-    || value.sampleState !== 'WAITING_FEATURE') {
+    || !['WAITING_FEATURE', 'PENDING', 'IMPORTED_NOT_INDEXED'].includes(String(value.sampleState))) {
     throw new ApiError('个人区域响应格式不正确', { code: 'INVALID_RESPONSE' })
   }
   return value as unknown as PersonalArea
