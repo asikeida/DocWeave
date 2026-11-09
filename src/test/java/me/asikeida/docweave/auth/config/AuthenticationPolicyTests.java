@@ -50,6 +50,6 @@ class AuthenticationPolicyTests {
     }
 
     private AuthProperties properties(boolean secure) {
-        return new AuthProperties(Duration.ofMinutes(5), Duration.ofDays(7), secure, "docweave", "docweave-api", 2);
+        return new AuthProperties(Duration.ofMinutes(5), Duration.ofDays(7), secure, "docweave", "docweave-api", 2, "");
     }
 }
