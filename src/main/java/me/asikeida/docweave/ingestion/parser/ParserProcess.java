@@ -45,6 +45,7 @@ public final class ParserProcess {
                 byte[] buffer = new byte[16384];
                 int length;
                 while ((length = input.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted()) throw new ParsingFailure(PARSER_UNAVAILABLE);
                     count += length;
                     if (count > expectedBytes) throw new ParsingFailure(INVALID_FILE);
                     digest.update(buffer, 0, length);

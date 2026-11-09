@@ -23,7 +23,7 @@ public class DocumentController {
     private final DocumentService service;
     public DocumentController(DocumentService service){this.service=service;}
     @PostMapping(value="/api/v1/knowledge-bases/{id}/documents",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary="上传本人知识库的小文件",description="PDF/TXT/Markdown，默认最大20MiB；原文件保存不等于已解析。同库重复复用已有文档，不是秒传。安全重放为200，首次完成为201。")
+    @Operation(summary="上传本人知识库的小文件",description="PDF/TXT/Markdown，默认最大20MiB。A2分支将新文件确认与解析待办同事务提交，解析由后台执行；worker关闭时保持等待。解析待办满时429 PROCESSING_QUEUE_FULL。同库重复复用已有文档，不是秒传。安全重放200，首次201。A2待审核，生产仍为A1。")
     @Parameter(name="X-XSRF-TOKEN",in=ParameterIn.HEADER,required=true)
     @ApiResponse(responseCode="201",description="新文档已保存",content=@Content(schema=@Schema(implementation=DocumentService.Result.class)))
     @ApiResponse(responseCode="200",description="重复内容或幂等重放",content=@Content(schema=@Schema(implementation=DocumentService.Result.class)))

@@ -26,10 +26,13 @@ public class DocumentService {
     private final DocumentRepository files;private final PersonalAreaRepository personal;private final PersonalAreaService areas;
     private final KnowledgeService knowledge;private final FileStorage storage;private final FileInspection inspection;
     private final DocumentProperties properties;private final Clock clock;private final TransactionTemplate tx;
+    private final me.asikeida.docweave.ingestion.service.ProcessingService processing;
     public DocumentService(DocumentRepository files,PersonalAreaRepository personal,PersonalAreaService areas,KnowledgeService knowledge,
-            FileStorage storage,FileInspection inspection,DocumentProperties properties,Clock clock,PlatformTransactionManager manager){
+            FileStorage storage,FileInspection inspection,DocumentProperties properties,Clock clock,PlatformTransactionManager manager,
+            me.asikeida.docweave.ingestion.service.ProcessingService processing){
         this.files=files;this.personal=personal;this.areas=areas;this.knowledge=knowledge;this.storage=storage;
         this.inspection=inspection;this.properties=properties;this.clock=clock;this.tx=new TransactionTemplate(manager);
+        this.processing=processing;
     }
     private String authorized(String user,String kb){
         if(!personal.lockActiveUser(user))throw AuthFailure.invalidLogin();
@@ -69,7 +72,9 @@ public class DocumentService {
                 if(duplicate.isPresent()){
                     files.complete(attempt.id(),duplicate.get());files.cleanup(attempt.key(),now);return new Completed(duplicate.get(),true);
                 }
-                return new Completed(files.create(user,tenant,kb,attempt,file,now),false);
+                String document=files.create(user,tenant,kb,attempt,file,now);
+                processing.enqueue(user,document);
+                return new Completed(document,false);
             });
             return new Result(summary(user,kb,completed.id()),completed.reused());
         } catch(Exception e){
@@ -104,6 +109,7 @@ public class DocumentService {
         writable();tx.executeWithoutResult(s->{
             String tenant=areas.current(user).organizationId();var owned=files.owned(tenant,id).orElseThrow(()->notFound());authorized(user,owned.kb());
             if(owned.deleted())return;
+            processing.cancelForDeletion(tenant,id);
             files.delete(tenant,id);var file=files.file(tenant,id);if(file!=null)files.cleanup(file.key(),clock.instant());
         });
     }

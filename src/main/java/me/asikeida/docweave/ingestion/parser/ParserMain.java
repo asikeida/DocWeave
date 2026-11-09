@@ -15,6 +15,8 @@ public final class ParserMain {
                 || !input.getParent().equals(output.getParent()) || Files.exists(output, LinkOption.NOFOLLOW_LINKS)) {
             System.exit(64);
         }
+        var parent = ProcessHandle.current().parent();
+        ParserWatchdog.start(java.time.Duration.ofSeconds(60), () -> parent.map(ProcessHandle::isAlive).orElse(true));
         ParsedDocument parsed = null;
         ParsingFailure.Code failure = null;
         try {

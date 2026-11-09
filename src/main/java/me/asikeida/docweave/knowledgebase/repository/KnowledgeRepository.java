@@ -23,7 +23,7 @@ public class KnowledgeRepository {
         for(var sample:samples){
             String doc=UUID.randomUUID().toString();
             jdbc.update("INSERT INTO documents (id,tenant_id,knowledge_base_id,title,sample_key,seed_version,created_at) VALUES (?,?,?,?,?,?,?)",doc,area.organizationId(),kb,sample.sample().title(),sample.sample().id(),sample.sample().version(),time);
-            jdbc.update("INSERT INTO document_versions VALUES (?,?,?,1,?,?,'NOT_INDEXED',?)",UUID.randomUUID().toString(),area.organizationId(),doc,sample.content(),sample.sample().sha256(),time);
+            jdbc.update("INSERT INTO document_versions (id,tenant_id,document_id,version_no,content_text,sha256,index_state,created_at) VALUES (?,?,?,1,?,?,'NOT_INDEXED',?)",UUID.randomUUID().toString(),area.organizationId(),doc,sample.content(),sample.sample().sha256(),time);
         }
         jdbc.update("UPDATE personal_sample_initializations SET import_state='IMPORTED_NOT_INDEXED',last_error_code=NULL,next_retry_at=NULL WHERE tenant_id=?",area.organizationId());
     }
@@ -45,11 +45,13 @@ public class KnowledgeRepository {
     public Optional<String> content(String tenant,String doc){return jdbc.query("SELECT content_text FROM document_versions WHERE tenant_id=? AND document_id=? AND version_no=1",(rs,n)->rs.getString(1),tenant,doc).stream().findFirst();}
     public Optional<DocumentDetail> detail(PersonalArea area,String id){
         return jdbc.query("""
-            SELECT d.id,d.knowledge_base_id,d.title,d.sample_key,d.seed_version,v.sha256,v.index_state,v.content_text
+            SELECT d.id,d.knowledge_base_id,d.title,d.sample_key,d.seed_version,v.sha256,v.index_state,v.content_text,
+                   d.source_type,d.created_at,f.byte_size,f.media_type
             FROM documents d JOIN knowledge_bases k ON k.id=d.knowledge_base_id AND k.tenant_id=d.tenant_id
             JOIN document_versions v ON v.document_id=d.id AND v.tenant_id=d.tenant_id AND v.version_no=1
+            LEFT JOIN document_files f ON f.tenant_id=d.tenant_id AND f.document_id=d.id AND f.version_id=v.id
             WHERE d.id=? AND d.tenant_id=? AND k.workspace_id=? AND d.deleted=FALSE AND k.deleted=FALSE
-            """,(rs,n)->new DocumentDetail(new DocumentSummary(rs.getString("id"),rs.getString("knowledge_base_id"),rs.getString("title"),rs.getString("sample_key"),rs.getString("seed_version"),rs.getString("sha256"),rs.getString("index_state")),rs.getString("content_text")),id,area.organizationId(),area.workspaceId()).stream().findFirst();
+            """,(rs,n)->new DocumentDetail(new DocumentSummary(rs.getString("id"),rs.getString("knowledge_base_id"),rs.getString("title"),rs.getString("sample_key"),rs.getString("seed_version"),rs.getString("sha256"),rs.getString("index_state"),rs.getString("source_type"),(Long)rs.getObject("byte_size"),rs.getString("media_type"),rs.getTimestamp("created_at").toInstant()),rs.getString("content_text")),id,area.organizationId(),area.workspaceId()).stream().findFirst();
     }
     public List<String> pending(Instant now){
         return jdbc.query("""

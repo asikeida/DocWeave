@@ -24,6 +24,6 @@ public class KnowledgeController {
     ResponseEntity<KnowledgeBase> get(@AuthenticationPrincipal Jwt jwt,@PathVariable String id){return response(service.knowledgeBase(jwt.getSubject(),id));}
     @GetMapping("/api/v1/knowledge-bases/{id}/documents") @Operation(summary="列出授权库内文档")
     ResponseEntity<List<DocumentSummary>> documents(@AuthenticationPrincipal Jwt jwt,@PathVariable String id){return response(service.documents(jwt.getSubject(),id));}
-    @GetMapping("/api/v1/documents/{id}") @Operation(summary="读取本人已入库的文档正文和版本元数据")
+    @GetMapping("/api/v1/documents/{id}") @Operation(summary="读取本人已入库的文档正文和版本元数据",description="示例或已解析成功的上传文档返回200；上传正文尚未生成时409 DOCUMENT_NOT_PARSED。正文仅供纯文本展示，解析成功仍为NOT_INDEXED。当前A2后台任务分支待审核，生产环境仍为A1。")
     ResponseEntity<DocumentDetail> document(@AuthenticationPrincipal Jwt jwt,@PathVariable String id){return response(service.document(jwt.getSubject(),id));}
 }
