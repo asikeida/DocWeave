@@ -9,6 +9,10 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 22MB
 
 management:
   endpoints:
@@ -28,6 +32,14 @@ logging:
     level: '%5p [requestId=%X{requestId:-}]'
 
 docweave:
+  documents:
+    root: ${DOCWEAVE_STORAGE_ROOT:.local/files}
+    write-enabled: false
+    max-file-bytes: 20971520
+    max-user-bytes: 104857600
+    max-concurrent: 2
+    daily-limit: 30
+    upload-lease: 15m
   auth:
     # 访问令牌有效期；代码校验上限为 15 分钟。
     access-ttl: 5m

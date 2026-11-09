@@ -3,6 +3,8 @@ import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { session } from '../auth/session'
 import { ApiError } from '../api/client'
 import type { KnowledgeBase, DocumentSummary, DocumentDetail } from '../api/knowledge'
+import FileUpload from './FileUpload.vue'
+const selected = ref<KnowledgeBase | null>(null)
 const libraries = ref<KnowledgeBase[]>([])
 const docs = ref<DocumentSummary[]>([])
 const detail = ref<DocumentDetail | null>(null)
@@ -23,16 +25,40 @@ async function execute(action: (signal: AbortSignal) => Promise<void>) {
   } finally { if (current === generation) busy.value = false }
 }
 function load(initialize = false) {
-  docs.value = []; detail.value = null; active.value = ''; libraries.value = []
-  return execute(async signal => { libraries.value = await session.knowledgeBases(initialize, signal) })
+  docs.value = []; detail.value = null; active.value = ''; libraries.value = []; selected.value = null
+  return execute(async signal => {
+    libraries.value = await session.knowledgeBases(initialize, signal)
+    const first = libraries.value[0]
+    if (first) {
+      selected.value = first; active.value = first.name
+      docs.value = await session.knowledgeDocuments(first.id, signal)
+    }
+  })
 }
 function open(kb: KnowledgeBase) {
+  selected.value = kb
   active.value = kb.name; docs.value = []; detail.value = null
   return execute(async signal => { docs.value = await session.knowledgeDocuments(kb.id, signal) })
 }
 function read(doc: DocumentSummary) {
   detail.value = null
   return execute(async signal => { detail.value = await session.knowledgeDocument(doc.id, signal) })
+}
+function refreshFiles() {
+  const kb = selected.value
+  if (kb) void execute(async signal => { docs.value = await session.knowledgeDocuments(kb.id, signal); libraries.value = await session.knowledgeBases(false, signal) })
+}
+function download(doc: DocumentSummary) {
+  return execute(async signal => {
+    const blob = await session.downloadDocument(doc.id, signal)
+    const url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = doc.title; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
+  })
+}
+function remove(doc: DocumentSummary) {
+  if (!window.confirm(`确认删除“${doc.title}”？删除后将不能访问。`)) return
+  detail.value = null
+  return execute(async signal => { await session.deleteDocument(doc.id, signal); if (selected.value) docs.value = await session.knowledgeDocuments(selected.value.id, signal); libraries.value = await session.knowledgeBases(false, signal) })
 }
 onMounted(() => { void load() })
 onBeforeUnmount(() => { generation++; pending?.abort() })
@@ -91,18 +117,42 @@ onBeforeUnmount(() => { generation++; pending?.abort() })
     <h4 v-if="active">
       {{ active }}的文档
     </h4>
+    <FileUpload
+      v-if="selected"
+      :key="selected.id"
+      :knowledge-base-id="selected.id"
+      @uploaded="refreshFiles"
+    />
     <ul>
       <li
         v-for="doc in docs"
         :key="doc.id"
       >
         <button
+          v-if="doc.source === 'SAMPLE'"
           class="button"
           :disabled="busy"
           @click="read(doc)"
         >
           {{ doc.title }} · 查看已入库正文
         </button>
+        <template v-else>
+          <p>{{ doc.title }} · {{ doc.byteSize }} 字节 · {{ doc.createdAt }} · 原文件已保存，待解析</p>
+          <button
+            class="button"
+            :disabled="busy"
+            @click="download(doc)"
+          >
+            下载 {{ doc.title }}
+          </button>
+          <button
+            class="button"
+            :disabled="busy"
+            @click="remove(doc)"
+          >
+            删除 {{ doc.title }}
+          </button>
+        </template>
       </li>
     </ul>
     <article
