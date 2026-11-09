@@ -1,0 +1,38 @@
+name: docweave-prod
+services:
+  app:
+    image: ${DOCWEAVE_IMAGE:?Set versioned DOCWEAVE_IMAGE}
+    container_name: docweave-app
+    restart: unless-stopped
+    mem_limit: 1g
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - ./runtime.env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+    ports:
+      - '127.0.0.1:8081:8080'
+    networks:
+      - data
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/actuator/health']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+networks:
+  data:
+    external: true
+    name: projects-data
