@@ -24,8 +24,11 @@ final class ProcessSupervisor {
         builder.redirectError(ProcessBuilder.Redirect.DISCARD);
         Process child = builder.start();
         try {
+            java.nio.file.Files.writeString(directory.resolve("child.owner"), child.pid() + ":"
+                    + child.info().startInstant().orElse(java.time.Instant.EPOCH).toEpochMilli());
             child.getOutputStream().close();
             if (!child.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) throw new ParsingFailure(PARSER_TIMEOUT);
+            if (child.exitValue() == 124) throw new ParsingFailure(PARSER_TIMEOUT);
             if (child.exitValue() != 0) throw new ParsingFailure(PARSER_PROCESS_FAILED);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

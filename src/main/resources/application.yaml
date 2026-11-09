@@ -32,6 +32,15 @@ logging:
     level: '%5p [requestId=%X{requestId:-}]'
 
 docweave:
+  processing:
+    worker-enabled: ${DOCWEAVE_PROCESSING_ENABLED:false}
+    root: ${DOCWEAVE_PARSER_ROOT:${java.io.tmpdir}/docweave-parser}
+    timeout: 60s
+    lease: 120s
+    heartbeat: 20s
+    max-pending-per-user: 10
+    max-attempts: 5
+    poll-delay-ms: 5000
   documents:
     root: ${DOCWEAVE_STORAGE_ROOT:.local/files}
     write-enabled: false

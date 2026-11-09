@@ -11,6 +11,8 @@ spring:
     locations: classpath:db/migration
 
 docweave:
+  processing:
+    worker-enabled: false
   documents:
     write-enabled: true
     worker-enabled: false

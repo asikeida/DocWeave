@@ -36,7 +36,7 @@ public class KnowledgeService {
     @Transactional(readOnly=true,isolation=Isolation.READ_COMMITTED)
     public DocumentDetail document(String user,String id){
         var detail=repository.detail(areas.current(user),id).orElseThrow(KnowledgeService::notFound);
-        if(detail.content()==null)throw new me.asikeida.docweave.document.domain.DocumentFailure("DOCUMENT_NOT_PARSED","原文件已保存，正文解析尚未接入",409);
+        if(detail.content()==null)throw new me.asikeida.docweave.document.domain.DocumentFailure("DOCUMENT_NOT_PARSED","原文件已保存，正文尚未解析成功",409);
         return detail;
     }
     private static AuthFailure notFound(){return new AuthFailure("RESOURCE_NOT_FOUND","资源不存在或不可访问",404);}
