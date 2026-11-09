@@ -64,7 +64,7 @@ onBeforeUnmount(() => pending?.abort())
     </button>
     <div v-if="area">
       <h2>{{ area.name }}</h2>
-      <p>个人区域已建立。可查看入库文档与只读模板，目前不能上传文件或问答。</p>
+      <p>个人区域已建立。可查看示例；开放文件写入的环境可保存原文件，目前尚未接入解析或问答。</p>
       <KnowledgeLibrary />
       <SamplePreview />
       <p>准备完成后，可尝试“试用期员工能远程办公吗？”以及“出差三天需要哪些申请和报销材料？”</p>

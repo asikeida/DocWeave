@@ -36,10 +36,11 @@ public class KnowledgeRepository {
     }
     public List<DocumentSummary> documents(String tenant,String kb){
         return jdbc.query("""
-            SELECT d.id,d.knowledge_base_id,d.title,d.sample_key,d.seed_version,v.sha256,v.index_state
+            SELECT d.id,d.knowledge_base_id,d.title,d.sample_key,d.seed_version,v.sha256,v.index_state,d.source_type,d.created_at,f.byte_size,f.media_type
             FROM documents d JOIN document_versions v ON v.tenant_id=d.tenant_id AND v.document_id=d.id AND v.version_no=1
+            LEFT JOIN document_files f ON f.tenant_id=d.tenant_id AND f.document_id=d.id
             WHERE d.tenant_id=? AND d.knowledge_base_id=? AND d.deleted=FALSE ORDER BY d.sample_key
-            """,(rs,n)->new DocumentSummary(rs.getString("id"),rs.getString("knowledge_base_id"),rs.getString("title"),rs.getString("sample_key"),rs.getString("seed_version"),rs.getString("sha256"),rs.getString("index_state")),tenant,kb);
+            """,(rs,n)->new DocumentSummary(rs.getString("id"),rs.getString("knowledge_base_id"),rs.getString("title"),rs.getString("sample_key"),rs.getString("seed_version"),rs.getString("sha256"),rs.getString("index_state"),rs.getString("source_type"),(Long)rs.getObject("byte_size"),rs.getString("media_type"),rs.getTimestamp("created_at").toInstant()),tenant,kb);
     }
     public Optional<String> content(String tenant,String doc){return jdbc.query("SELECT content_text FROM document_versions WHERE tenant_id=? AND document_id=? AND version_no=1",(rs,n)->rs.getString(1),tenant,doc).stream().findFirst();}
     public Optional<DocumentDetail> detail(PersonalArea area,String id){

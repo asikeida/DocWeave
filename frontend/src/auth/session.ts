@@ -1,4 +1,5 @@
 import * as knowledge from '../api/knowledge'
+import * as files from '../api/files'
 import * as samples from '../api/samples'
 import { computed, shallowRef } from 'vue'
 import { ApiError } from '../api/client'
@@ -117,6 +118,26 @@ export const session = {
     const result = await knowledge.document(accessToken, id, signal)
     if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
     return result
+  },
+  async uploadDocument(kb: string, file: File, key: string, progress: (value: number) => void, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await files.upload(accessToken, kb, file, key, progress, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async downloadDocument(id: string, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await files.download(accessToken, id, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async deleteDocument(id: string, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    await files.remove(accessToken, id, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
   },
   async signOut() {
     // 先等待本标签页刷新完成，再发送退出，避免并发轮换令牌污染浏览器 Cookie。

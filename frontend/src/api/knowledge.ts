@@ -1,6 +1,6 @@
 import { ApiError, requestJson } from './client'
 export interface KnowledgeBase { id: string; name: string; workspaceId: string; documentCount: number; state: 'NOT_INDEXED' }
-export interface DocumentSummary { id: string; knowledgeBaseId: string; title: string; sampleKey: string; seedVersion: string; sha256: string; indexState: 'NOT_INDEXED' }
+export interface DocumentSummary { id: string; knowledgeBaseId: string; title: string; sampleKey: string | null; seedVersion: string | null; sha256: string; indexState: 'NOT_INDEXED'; source: 'SAMPLE' | 'UPLOAD'; byteSize: number | null; mediaType: string | null; createdAt: string | null }
 export interface DocumentDetail { document: DocumentSummary; content: string }
 const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object'
 function invalid(): never { throw new ApiError('知识库响应格式不正确', { code: 'INVALID_RESPONSE' }) }
@@ -10,9 +10,16 @@ export function parseKnowledgeBase(v: unknown): KnowledgeBase {
   return { id: v.id, name: v.name, workspaceId: v.workspaceId, documentCount: Number(v.documentCount), state: 'NOT_INDEXED' }
 }
 export function parseDocument(v: unknown): DocumentSummary {
-  if (!record(v) || !['id', 'knowledgeBaseId', 'title', 'sampleKey', 'seedVersion', 'sha256'].every(k => typeof v[k] === 'string' && !!v[k])
+  if (!record(v) || !['id', 'knowledgeBaseId', 'title', 'sha256'].every(k => typeof v[k] === 'string' && !!v[k])
     || !/^[a-f0-9]{64}$/.test(String(v.sha256)) || v.indexState !== 'NOT_INDEXED') return invalid()
-  return v as unknown as DocumentSummary
+  const source = v.source ?? 'SAMPLE'
+  if (source !== 'SAMPLE' && source !== 'UPLOAD') return invalid()
+  if (source === 'SAMPLE' && (typeof v.sampleKey !== 'string' || !v.sampleKey || typeof v.seedVersion !== 'string' || !v.seedVersion)) return invalid()
+  if (source === 'UPLOAD' && (v.sampleKey !== null || v.seedVersion !== null || !Number.isSafeInteger(v.byteSize) || Number(v.byteSize) <= 0 || typeof v.mediaType !== 'string' || typeof v.createdAt !== 'string')) return invalid()
+  return { id: String(v.id), knowledgeBaseId: String(v.knowledgeBaseId), title: String(v.title), sampleKey: source === 'SAMPLE' ? String(v.sampleKey) : null,
+    seedVersion: source === 'SAMPLE' ? String(v.seedVersion) : null, sha256: String(v.sha256), indexState: 'NOT_INDEXED', source,
+    byteSize: source === 'UPLOAD' ? Number(v.byteSize) : null, mediaType: source === 'UPLOAD' ? String(v.mediaType) : null,
+    createdAt: typeof v.createdAt === 'string' ? v.createdAt : null }
 }
 async function request(token: string, path: string, initialize: boolean, signal?: AbortSignal): Promise<unknown> {
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` }

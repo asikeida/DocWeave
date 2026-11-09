@@ -19,3 +19,8 @@ logging:
   structured:
     format:
       console: ecs
+
+docweave:
+  documents:
+    root: ${DOCWEAVE_STORAGE_ROOT:/data/docweave}
+    write-enabled: ${DOCWEAVE_DOCUMENTS_WRITE_ENABLED:false}

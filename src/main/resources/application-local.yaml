@@ -23,5 +23,7 @@ logging:
       clean-history-on-start: true
 
 docweave:
+  documents:
+    write-enabled: true
   auth:
     cookie-secure: false
