@@ -1,3 +1,4 @@
+import * as samples from '../api/samples'
 import { computed, shallowRef } from 'vue'
 import { ApiError } from '../api/client'
 import * as api from '../api/auth'
@@ -81,6 +82,20 @@ export const session = {
     return area
   },
 
+  async samples(signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await samples.listSamples(accessToken, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
+  async samplePreview(id: string, signal?: AbortSignal) {
+    if (!await this.restore() || !accessToken) throw new ApiError('请先登录', { code: 'UNAUTHENTICATED' })
+    const startedAt = revision
+    const result = await samples.previewSample(accessToken, id, signal)
+    if (startedAt !== revision) throw new ApiError('身份已变化', { code: 'CANCELLED' })
+    return result
+  },
   async signOut() {
     // 先等待本标签页刷新完成，再发送退出，避免并发轮换令牌污染浏览器 Cookie。
     if (refreshInFlight) await refreshInFlight.catch(() => false)

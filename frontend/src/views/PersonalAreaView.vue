@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SamplePreview from '../components/SamplePreview.vue'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { session } from '../auth/session'
 import type { PersonalArea } from '../api/auth'
@@ -63,8 +64,7 @@ onBeforeUnmount(() => pending?.abort())
     <div v-if="area">
       <h2>{{ area.name }}</h2>
       <p>个人区域已建立。示例资料待接入，目前不能上传文件或问答。</p>
-      <h3>即将提供的虚构示例</h3>
-      <ul><li>星舟科技员工手册</li><li>星舟科技差旅报销指南</li></ul>
+      <SamplePreview />
       <p>准备完成后，可尝试“试用期员工能远程办公吗？”以及“出差三天需要哪些申请和报销材料？”</p>
     </div>
   </section>
