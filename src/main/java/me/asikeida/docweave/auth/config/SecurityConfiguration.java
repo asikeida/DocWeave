@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.transaction.TransactionException;
 
@@ -31,7 +32,7 @@ public class SecurityConfiguration {
         csrf.setCookieName(properties.cookieSecure() ? "__Host-docweave_csrf" : "docweave_csrf");
         csrf.setCookieCustomizer(cookie -> cookie.httpOnly(true).secure(properties.cookieSecure())
                 .sameSite("Strict").path("/"));
-        var authPaths = PathPatternRequestMatcher.withDefaults().matcher("/api/v1/auth/**");
+        var authPaths = PathPatternRequestMatcher.withDefaults().matcher("/api/v1/**");
         AuthenticationEntryPoint entryPoint = (request, response, exception) -> {
             if (exception instanceof AuthenticationServiceException) {
                 errors.write(request, response, 503, "AUTH_UNAVAILABLE", "认证服务暂时不可用，请稍后重试");
@@ -39,17 +40,22 @@ public class SecurityConfiguration {
                 errors.write(request, response, 401, "UNAUTHENTICATED", "登录已失效，请重新登录");
             }
         };
+        // Resource Server默认忽略Bearer请求的CSRF；这里统一使用框架CsrfFilter，明确保护所有API写请求。
+        CsrfFilter csrfFilter = new CsrfFilter(csrf);
+        csrfFilter.setRequireCsrfProtectionMatcher(request -> authPaths.matches(request)
+                && !List.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod()));
+        csrfFilter.setAccessDeniedHandler((request, response, exception) ->
+                errors.write(request, response, 403, "ACCESS_DENIED", "请求未获授权或安全校验未通过"));
         return http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .requestCache(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-                .csrf(config -> config.csrfTokenRepository(csrf).requireCsrfProtectionMatcher(request ->
-                        authPaths.matches(request)
-                                && !List.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod())))
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterAt(csrfFilter, CsrfFilter.class)
                 .authorizeHttpRequests(rules -> rules
-                        .requestMatchers("/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .exceptionHandling(config -> config.authenticationEntryPoint(entryPoint)

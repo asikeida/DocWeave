@@ -11,6 +11,8 @@ export const router = createRouter({
       children: [
         { path: '', name: 'home', component: () => import('../views/HomeView.vue'), meta: { title: '概览' } },
         { path: 'login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { title: '登录' } },
+        { path: 'register', name: 'register', component: () => import('../views/RegisterView.vue'), meta: { title: '注册' } },
+        { path: 'personal', name: 'personal', component: () => import('../views/PersonalAreaView.vue'), meta: { title: '我的资料', requiresAuth: true } },
         { path: 'account', name: 'account', component: () => import('../views/AccountView.vue'), meta: { title: '我的账号', requiresAuth: true } },
         { path: ':pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFoundView.vue'), meta: { title: '页面不存在' } },
       ],

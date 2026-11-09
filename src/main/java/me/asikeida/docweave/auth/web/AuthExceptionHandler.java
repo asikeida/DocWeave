@@ -31,7 +31,7 @@ public class AuthExceptionHandler {
         }
         log.warn("Authentication request rejected: code={}", failure.getCode());
         if (failure.getStatus() == 401) { response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer"); }
-        if (failure.getStatus() == 429) { response.setHeader(HttpHeaders.RETRY_AFTER, "60"); }
+        if (failure.getStatus() == 429) { response.setHeader(HttpHeaders.RETRY_AFTER, "REGISTRATION_RATE_LIMITED".equals(failure.getCode()) ? "3600" : "60"); }
         return ResponseEntity.status(failure.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(ApiError.of(failure.getCode(), failure.getMessage(),
                         (String) request.getAttribute(RequestIdFilter.REQUEST_ID_ATTRIBUTE)));
