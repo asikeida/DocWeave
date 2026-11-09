@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { session } from '../auth/session'
 </script>
 
 <template>
@@ -64,6 +65,13 @@ import { RouterLink, RouterView } from 'vue-router'
           /></svg>
           项目概览
         </RouterLink>
+        <RouterLink
+          class="nav-link"
+          :to="session.user.value ? '/account' : '/login'"
+          active-class="is-active"
+        >
+          {{ session.user.value ? '我的账号' : '登录' }}
+        </RouterLink>
       </nav>
       <div class="sidebar-note">
         <span class="small-label">从文档，到有据可循的答案</span>
@@ -79,7 +87,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </aside>
     <div class="main-shell">
       <header class="topbar">
-        <span>个人知识 · 更进一步</span>
+        <span>个人与团队知识 · 更进一步</span>
         <span class="topbar-badge"><span class="status-dot" />持续构建中</span>
       </header>
       <main

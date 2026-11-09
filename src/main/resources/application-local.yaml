@@ -21,3 +21,7 @@ logging:
       max-history: 7
       total-size-cap: 100MB
       clean-history-on-start: true
+
+docweave:
+  auth:
+    cookie-secure: false

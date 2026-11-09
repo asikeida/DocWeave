@@ -21,6 +21,24 @@ jobs:
     timeout-minutes: 20
     env:
       SPRING_PROFILES_ACTIVE: test
+      DOCWEAVE_TEST_MYSQL_URL: jdbc:mysql://127.0.0.1:3306/docweave_ci?serverTimezone=UTC
+      DOCWEAVE_TEST_MYSQL_USERNAME: docweave_ci
+      DOCWEAVE_TEST_MYSQL_PASSWORD: ci-only-password
+    services:
+      mysql:
+        image: mysql:8.4.13
+        env:
+          MYSQL_DATABASE: docweave_ci
+          MYSQL_USER: docweave_ci
+          MYSQL_PASSWORD: ci-only-password
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="MYSQL_PWD=ci-only-password mysql --protocol=TCP -h127.0.0.1 -udocweave_ci docweave_ci -e 'SELECT 1'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
